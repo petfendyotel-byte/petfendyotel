@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petfendy Mobil Bulut Yönetim Paneli</title>
+    <!-- Şık ve Mobil Uyumlu Google Harici Hazır Tasarım Şablonu -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
+    <style>
+        body { background-color: #f5f7fa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        header { background: #1e3d59 !important; color: white !important; padding: 15px !important; border-bottom: 3px solid #ffc13b; }
+        .card { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 15px; margin-bottom: 20px; border-top: 4px solid #ffc13b; }
+        .btn-primary { background: #ffc13b !important; color: #1e3d59 !important; font-weight: bold; border: none; }
+        .btn-success { background: #4caf50 !important; color: white !important; font-weight: bold; border: none; }
+        .btn-danger { background: #f44336 !important; color: white !important; font-weight: bold; border: none; }
+        label { font-weight: bold; color: #1e3d59; margin-top: 8px; display: block; }
+        input, select, textarea { width: 100%; max-width: 100%; margin-bottom: 10px; }
+        .pet-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .pet-item:hover { background: #f0f4f8; }
+        .badge { background: #1e3d59; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; }
+        .mod-title { font-style: italic; color: #ff9800; font-weight: bold; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <header class="sticky">
+        <div class="container" style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-size:1.3rem; font-weight:bold;">🐾 Petfendy Mobil</span>
+            <button class="btn-primary" onclick="formuTemizleModu()">+ Yeni Kayıt</button>
+        </div>
+    </header>
+
+    <div class="container" style="padding: 10px; margin-top: 60px;">
+        <script>
+            // =========================================================================
+            // ⚠️ GOOGLE FIREBASE BİLGİLERİNİZİ AŞAĞIDAKİ TIRNAKLARA YAPIŞTIRIN
+            // =========================================================================
+            
+ const FIREBASE_URL = "https://petfendy-otel-default-rtdb.europe-west1.firebasedatabase.app";
+            const FIREBASE_SECRET = "AIzaSyDUBfRLVmlIJs0ytVwrtWqiATPsJ_p9XvY";
+
+
+            let fUrl = FIREBASE_URL;
+            if (fUrl && !fUrl.endsWith("/")) fUrl += "/";
+
+            let seciliPetId = null;
+            let seciliSahipId = null;
+            let tumHayvanlar = {};
+        </script>
+
+        <!-- ARAMA VE RESEPSİYON SEKME KARTI -->
+        <div class="card">
+            <h3>🔍 Hızlı Misafir Ara</h3>
+            <input type="text" id="txtAra" placeholder="Misafir veya sahip adı yazın..." oninput="petleriFiltrele()">
+            <div id="listeAlanlar" style="max-height: 200px; overflow-y: auto; background: #fafafa; border:1px solid #ccc; border-radius:4px;">
+                <div style="padding:10px; color:#888;">Veriler buluttan yükleniyor...</div>
+            </div>
+        </div>
+
+        <!-- KAYIT VE GÜNCELLEME FORMU KARTI -->
+        <div class="card">
+            <h3 id="formBaslik">📝 Yeni Müşteri & Pet Kaydı</h3>
+            <div id="lblModUyarisi" class="mod-title" style="display:none;">Güncelleme Modu: Seçili misafirin bilgileri düzenleniyor.</div>
+            
+            <form id="petForm" onsubmit="event.preventDefault(); kaydetGuncelleTetikle();">
+                <fieldset>
+                    <legend style="color:#1e3d59; font-weight:bold;">1. Sahip Bilgileri</legend>
+                    <label>Müşteri Adı Soyadı: *</label>
+                    <input type="text" id="s_ad" required>
+                    
+                    <label>T.C. Kimlik No:</label>
+                    <input type="number" id="s_tc">
+                    
+                    <label>Telefon:</label>
+                    <input type="tel" id="s_tel">
+                    
+                    <label>Adres:</label>
+                    <textarea id="s_adres" rows="2"></textarea>
+                    
+                    <label>Acil Durum Aranacak Kişi:</label>
+                    <input type="text" id="s_acil_ad">
+                    
+                    <label>Acil Durum Telefonu:</label>
+                    <input type="tel" id="s_acil_tel">
+                </fieldset>
+
+                <fieldset style="margin-top:15px;">
+                    <legend style="color:#1e3d59; font-weight:bold;">2. Evcil Hayvan Bilgileri</legend>
+                    <label>Hayvan Adı: *</label>
+                    <input type="text" id="p_ad" required>
+                    
+                    <label>Türü (Köpek/Kedi):</label>
+                    <input type="text" id="p_turu" value="Köpek">
+                    
+                    <label>Cinsi (Breed):</label>
+                    <input type="text" id="p_cinsi">
+                    
+                    <label>Cinsiyeti (Dişi/Erkek):</label>
+                    <select id="p_cins">
+                        <option value="Dişi">Dişi</option>
+                        <option value="Erkek">Erkek</option>
+                    </select>
+                    
+                    <label>Alerjileri / Hastalıkları:</label>
+                    <input type="text" id="p_alerji" value="Yok">
+                    
+                    <label>İlaç Kullanıyor mu? (Evet/Hayır):</label>
+                    <select id="p_ilac_durum">
+                        <option value="Hayır">Hayır</option>
+                        <option value="Evet">Evet</option>
+                    </select>
+                    
+                    <label>Kullandığı İlaçlar:</label>
+                    <input type="text" id="p_ilaclar">
+                    
+                    <label>İlaç Dozları:</label>
+                    <input type="text" id="p_dozlar">
+                    
+                    <label>Mama Markası:</label>
+                    <input type="text" id="p_mama_marka">
+                    
+                    <label>Mama Ölçüsü (gr):</label>
+                    <input type="number" id="p_mama_olcu">
+                    
+                    <label>Günde Kaç Öğün?</label>
+                    <input type="number" id="p_mama_ogun" value="2">
+                    
+                    <label>Diğer Bırakılan Malzemeler:</label>
+                    <input type="text" id="p_diger">
+                </fieldset>
+
+                <div style="margin-top:20px; display:flex; gap:10px;">
+                    <button type="submit" id="btnKaydet" class="btn-success" style="flex:2;">Yeni Kayıt Ekle</button>
+                    <button type="button" id="btnIptal" class="btn-danger" style="flex:1; display:none;" onclick="formuTemizleModu()">İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BULUT BAĞLANTI VE CANLI VERİ MOTORU -->
+    <script>
+        async function buluttanYukle() {
+            if(fUrl.includes("BURAYA")) return;
+            try {
+                let res = await fetch(`${fUrl}hayvanlar.json?auth=${FIREBASE_SECRET}`);
+                let data = await res.json();
+                tumHayvanlar = data || {};
+                petleriFiltrele();
+            } catch (e) {
+                document.getElementById("listeAlanlar").innerHTML = `<div style="padding:10px; color:red;">Bağlantı Hatası: ${e.message}</div>`;
+            }
+        }
+
+        function petleriFiltrele() {
+            let kelime = document.getElementById("txtAra").value.toLowerCase();
+            let listeAlan = document.getElementById("listeAlanlar");
+            listeAlan.innerHTML = "";
+
+            let keys = Object.keys(tumHayvanlar).reverse();
+            let sayac = 0;
+
+            for(let key of keys) {
+                let pet = tumHayvanlar[key];
+                let petAd = (pet.ad || "İsimsiz").toLowerCase();
+                let sahipAd = (pet.sahip_ad || "Bilinmeyen").toLowerCase();
+
+                if(!kelime || petAd.includes(kelime) || sahipAd.includes(kelime)) {
+                    sayac++;
+                    let div = document.createElement("div");
+                    div.className = "pet-item";
+                    div.onclick = () => guncellemeModunuAc(key, pet);
+                    div.innerHTML = `
+                        <div>
+                            <strong>${pet.ad || 'İsimsiz'}</strong> 
+                            <span style="font-size:0.9rem; color:#666;">(Sahibi: ${pet.sahip_ad || 'Bilinmeyen'})</span>
+                        </div>
+                        <span class="badge">${pet.cinsi || pet.turu || 'Evcil Hayvan'}</span>
+                    `;
+                    listeAlan.appendChild(div);
+                }
+            }
+
+            if(sayac === 0) {
+                listeAlan.innerHTML = `<div style="padding:10px; color:#888;">Eşleşen kayıt bulunamadı.</div>`;
+            }
+        }
+
+        async function guncellemeModunuAc(petId, petVerisi) {
+            seciliPetId = petId;
+            seciliSahipId = petVerisi.sahip_id;
+
+            document.getElementById("formBaslik").innerText = `📝 ${petVerisi.ad} Bilgilerini Güncelle`;
+            document.getElementById("lblModUyarisi").style.display = "block";
+            document.getElementById("btnKaydet").innerText = "Değişiklikleri Kaydet (Güncelle)";
+            document.getElementById("btnKaydet").className = "btn-primary";
+            document.getElementById("btnIptal").style.display = "inline-block";
+
+            // Formu bulut verileriyle doldur
+            document.getElementById("p_ad").value = petVerisi.ad || "";
+            document.getElementById("p_turu").value = petVerisi.turu || "";
+            document.getElementById("p_cinsi").value = petVerisi.cinsi || "";
+            document.getElementById("p_cins").value = petVerisi.cinsiyeti || "Dişi";
+            document.getElementById("p_alerji").value = petVerVerisi(petVerisi.alerji, "Yok");
+            document.getElementById("p_ilac_durum").value = petVerisi.ilac_durum || "Hayır";
+            document.getElementById("p_ilaclar").value = petVerisi.ilaclar || "";
+            document.getElementById("p_dozlar").value = petVerisi.dozlar || "";
+            document.getElementById("p_mama_marka").value = petVerisi.mama_marka || "";
+            document.getElementById("p_mama_olcu").value = petVerisi.mama_olcu || "";
+            document.getElementById("p_mama_ogun").value = petVerisi.mama_ogun || "2";
+            document.getElementById("p_diger").value = petVerisi.diger_malzeme || "";
+
+            window.scrollTo({ top: document.getElementById("formBaslik").offsetTop - 70, behavior: 'smooth' });
+
+            try {
+                let res = await fetch(`${fUrl}sahipler/${seciliSahipId}.json?auth=${FIREBASE_SECRET}`);
+                let sData = await res.json();
+                if(sData) {
+                    document.getElementById("s_ad").value = sData.ad_soyad || "";
+                    document.getElementById("s_tc").value = sData.tc_no || "";
+                    document.getElementById("s_tel").value = sData.telefon || "";
+                    document.getElementById("s_adres").value = sData.adres || "";
+                    document.getElementById("s_acil_ad").value = sData.acil_ad || "";
+                    document.getElementById("s_acil_tel").value = sData.acil_tel || "";
+                }
+            } catch(e) {
+                alert("Sahip bilgileri buluttan çekilemedi: " + e.message);
+            }
+        }
+
+        function petVerVerisi(deger, varsayilan) { return deger !== undefined ? deger : varsayilan; }
+
+        function formuTemizleModu() {
+            seciliPetId = null;
+            seciliSahipId = null;
+            document.getElementById("petForm").reset();
+            document.getElementById("formBaslik").innerText = "📝 Yeni Müşteri & Pet Kaydı";
+            document.getElementById("lblModUyarisi").style.display = "none";
+            document.getElementById("btnKaydet").innerText = "Yeni Kayıt Ekle";
+            document.getElementById("btnKaydet").className = "btn-success";
+            document.getElementById("btnIptal").style.display = "none";
+            document.getElementById("p_turu").value = "Köpek";
+            document.getElementById("p_alerji").value = "Yok";
+            document.getElementById("p_mama_ogun").value = "2";
+        }
+
+        async function kaydetGuncelleTetikle() {
+            let sahipVeri = {
+                ad_soyad: document.getElementById("s_ad").value,
+                tc_no: document.getElementById("s_tc").value,
+                telefon: document.getElementById("s_tel").value,
+                adres: document.getElementById("s_adres").value,
+                acil_ad: document.getElementById("s_acil_ad").value,
+                acil_tel: document.getElementById("s_acil_tel").value
+            };
+
+            let petVeri = {
+                sahip_id: seciliSahipId,
+                sahip_ad: sahipVeri.ad_soyad,
+                ad: document.getElementById("p_ad").value,
+                turu: document.getElementById("p_turu").value,
+                cinsi: document.getElementById("p_cinsi").value,
+                cinsiyeti: document.getElementById("p_cins").value,
+                alerji: document.getElementById("p_alerji").value,
+                ilac_durum: document.getElementById("p_ilac_durum").value,
+                ilaclar: document.getElementById("p_ilaclar").value,
+                dozlar: document.getElementById("p_dozlar").value,
+                mama_marka: document.getElementById("p_mama_marka").value,
+                mama_olcu: document.getElementById("p_mama_olcu").value,
+                mama_ogun: document.getElementById("p_mama_ogun").value,
+                diger_malzeme: document.getElementById("p_diger").value
+            };
+
+            try {
+                if(seciliPetId && seciliSahipId) {
+                    // GÜNCELLEME MODU (PUT)
+                    await fetch(`${fUrl}sahipler/${seciliSahipId}.json?auth=${FIREBASE_SECRET}`, { method: 'PUT', body: JSON.stringify(sahipVeri) });
+                    await fetch(`${fUrl}hayvanlar/${seciliPetId}.json?auth=${FIREBASE_SECRET}`, { method: 'PUT', body: JSON.stringify(petVeri) });
+                    alert("Misafir bilgileri bulutta başarıyla güncellendi!");
+                } else {
+                    // YENİ KAYIT MODU (POST)
+                    let sRes = await fetch(`${fUrl}sahipler.json?auth=${FIREBASE_SECRET}`, { method: 'POST', body: JSON.stringify(sahipVeri) });
+                    let sJson = await sRes.json();
+                    petVeri.sahip_id = sJson.name;
+                    await fetch(`${fUrl}hayvanlar.json?auth=${FIREBASE_SECRET}`, { method: 'POST', body: JSON.stringify(petVeri) });
+                    alert("Yeni müşteri ve patili dostumuz buluta başarıyla kaydedildi!");
+                }
+                formuTemizleModu();
+                buluttanYukle();
+            } catch(e) {
+                alert("Bulut işlem hatası meydana geldi: " + e.message);
+            }
+        }
+
+        window.onload = buluttanYukle;
+    </script>
+</body>
+</html>
