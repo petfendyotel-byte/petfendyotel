@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Petfendy Evcil Hayvan Oteli - Rezervasyon Formu</title>
+    <title>Petfendy Evcil Hayvan Oteli - Detaylı Rezervasyon Formu</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
     <style>
         body { background-color: #f5f7fa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -11,23 +11,24 @@
         .card { background: white; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.06); padding: 20px; margin-top: 80px; border-top: 5px solid #ffc13b; }
         .btn-success { background: #4caf50 !important; color: white !important; font-weight: bold; border: none; width: 100%; padding: 12px; font-size: 1.1rem; border-radius: 6px; cursor: pointer; }
         label { font-weight: bold; color: #1e3d59; margin-top: 10px; display: block; }
-        input, select, textarea { width: 100%; margin-bottom: 12px; border-radius: 4px; border: 1px solid #ccc; padding: 8px; }
-        .info-text { font-size: 0.9rem; color: #666; font-style: italic; margin-top: -8px; margin-bottom: 10px; }
+        input, select, textarea { width: 100%; margin-bottom: 12px; border-radius: 4px; border: 1px solid #ccc; padding: 8px; box-sizing: border-box; }
+        .info-text { font-size: 0.85rem; color: #666; font-style: italic; margin-top: -8px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <header class="sticky">
         <span style="font-size:1.4rem; font-weight:bold;">🐾 Petfendy Evcil Hayvan Oteli</span>
-        <div style="font-size:0.9rem; color:#ffc13b; font-weight:bold; margin-top:2px;">Online Rezervasyon İstek Formu</div>
+        <div style="font-size:0.9rem; color:#ffc13b; font-weight:bold; margin-top:2px;">Online Detaylı Rezervasyon Formu</div>
     </header>
 
-    <div class="container" style="max-width: 550px; padding: 10px;">
+    <div class="container" style="max-width: 600px; padding: 10px;">
         <div class="card">
-            <p style="text-align: center; color: #555; font-weight: 500;">Misafir etmek istediğiniz patili dostumuzun ve sizin bilgilerinizi eksiksiz doldurarak rezervasyon talebi oluşturabilirsiniz.</p>
+            <p style="text-align: center; color: #555; font-weight: 500;">Sözleşmenizin otomatik hazırlanabilmesi and dostumuza en iyi bakımı sunabilmemiz için lütfen aşağıdaki bilgileri eksiksiz doldurunuz.</p>
             <hr>
             
-            <form id="musteriRezervasyonForm" onsubmit="event.preventDefault(); rezervasyonGonder();">
+            <form id="tamRezervasyonForm" onsubmit="event.preventDefault(); rezervasyonGonder();">
+                
                 <script>
                     
  const FIREBASE_URL = "https://petfendy-otel-default-rtdb.europe-west1.firebasedatabase.app";
@@ -38,54 +39,88 @@
                 </script>
 
                 <fieldset>
-                    <legend style="color:#1e3d59; font-weight:bold;">1. İletişim Bilgileriniz</legend>
+                    <legend style="color:#1e3d59; font-weight:bold;">1. Müşteri (Sahip) Bilgileri</legend>
                     
                     <label>Adınız Soyadınız: *</label>
-                    <input type="text" id="m_ad" placeholder="Lütfen tam adınızı yazın" required>
+                    <input type="text" id="s_ad_soyad" placeholder="Örn: Ahmet Yılmaz" required>
+                    
+                    <label>T.C. Kimlik No:</label>
+                    <input type="text" id="s_tc_no" maxlength="11" placeholder="Sözleşme için gereklidir">
                     
                     <label>Telefon Numaranız: *</label>
-                    <input type="tel" id="m_tel" placeholder="05xx xxx xx xx" required>
+                    <input type="tel" id="s_telefon" placeholder="05xxxxxxxx" required>
+                    
+                    <label>Açık Adresiniz:</label>
+                    <textarea id="s_adres" rows="2" placeholder="Ev veya iş adresiniz"></textarea>
+                    
+                    <label>Acil Durumda Aranacak Kişi Adı:</label>
+                    <input type="text" id="s_acil_ad" placeholder="Size ulaşamazsak aranacak kişinin adı">
+                    
+                    <label>Acil Durum Telefonu:</label>
+                    <input type="tel" id="s_acil_tel" placeholder="05xxxxxxxx">
                 </fieldset>
 
-                <fieldset style="margin-top:15px;">
-                    <legend style="color:#1e3d59; font-weight:bold;">2. Patili Dostumuzun Bilgileri</legend>
+                <fieldset style="margin-top:20px;">
+                    <legend style="color:#1e3d59; font-weight:bold;">2. Evcil Hayvan Bilgileri</legend>
                     
-                    <label>Dostumuzun Adı: *</label>
-                    <input type="text" id="m_pet_ad" placeholder="Dostumuzun adı nedir?" required>
+                    <label>Hayvanın Adı: *</label>
+                    <input type="text" id="p_ad" placeholder="Dostumuzun adı" required>
                     
-                    <label>Türü / Irkı (Cinsi): *</label>
-                    <input type="text" id="m_pet_cinsi" placeholder="Örn: Chihuahua, Pomeranian, Kedi" required>
+                    <label>Türü: *</label>
+                    <select id="p_turu">
+                        <option value="Köpek">Köpek</option>
+                        <option value="Kedi">Kedi</option>
+                    </select>
                     
-                    <label>Cinsiyeti:</label>
-                    <select id="m_pet_cinsiyet">
+                    <label>Cinsi (Breed): *</label>
+                    <input type="text" id="p_cinsi" placeholder="Örn: Chihuahua, Pomeranian" required>
+                    
+                    <label>Cinsiyeti: *</label>
+                    <select id="p_cinsiyeti">
                         <option value="Dişi">Dişi</option>
                         <option value="Erkek">Erkek</option>
                     </select>
+                    
+                    <label>Alerjileri / Kronik Hastalıkları:</label>
+                    <input type="text" id="p_alerji" placeholder="Varsa alerji veya hastalıkları yoksa boş bırakın">
+                    
+                    <label>İlaç Kullanıyor mu?:</label>
+                    <select id="p_ilac_durum">
+                        <option value="Hayır">Hayır</option>
+                        <option value="Evet">Evet</option>
+                    </select>
+                    
+                    <label>Kullandığı İlaçlar:</label>
+                    <input type="text" id="p_ilaclar" placeholder="Varsa ilaç isimleri">
+                    
+                    <label>İlaç Dozları / Saatleri:</label>
+                    <input type="text" id="p_dozlar" placeholder="Örn: Sabah 1 tablet, Akşam yarım">
+                    
+                    <label>Mama Markası:</label>
+                    <input type="text" id="p_mama_marka" placeholder="Örn: Royal Canin Pro">
+                    
+                    <label>Mama Ölçüsü (Gram):</label>
+                    <input type="text" id="p_mama_olcu" placeholder="Örn: 40">
+                    
+                    <label>Günde Kaç Öğün?:</label>
+                    <input type="text" id="p_mama_ogun" placeholder="Örn: 2">
+                    
+                    <label>Diğer Bırakılan Malzemeler:</label>
+                    <input type="text" id="p_diger_malzeme" placeholder="Örn: Tasarı, yatak, favori oyuncak">
                 </fieldset>
 
-                <fieldset style="margin-top:15px;">
-                    <legend style="color:#1e3d59; font-weight:bold;">3. Rezervasyon Tarihleri</legend>
+                <fieldset style="margin-top:20px;">
+                    <legend style="color:#1e3d59; font-weight:bold;">3. Konaklama Tarihleri</legend>
                     
                     <label>Otele Giriş Tarihi: *</label>
-                    <input type="date" id="m_tarih_giris" required>
+                    <input type="date" id="m_giris" required>
                     
-                    <label>Oteldan Çıkış Tarihi: *</label>
-                    <input type="date" id="m_tarih_cikis" required>
-                </fieldset>
-
-                <fieldset style="margin-top:15px;">
-                    <legend style="color:#1e3d59; font-weight:bold;">4. Beslenme, Sağlık ve Özel Notlar</legend>
-                    
-                    <label>Mama Markası ve Günlük Ölçüsü:</label>
-                    <input type="text" id="m_mama" placeholder="Örn: Royal Canin, günde 2 öğün 40gr">
-                    
-                    <label>Düzenli Kullandığı İlaç veya Alerji Notu:</label>
-                    <textarea id="m_saglik" rows="2" placeholder="Varsa ilaç adı, dozajı veya alerji durumlarını belirtiniz. Yoksa boş bırakabilirsiniz."></textarea>
-                    <p class="info-text">Kronik rahatsızlık veya ilaç kullanımı varsa lütfen detaylıca belirtiniz.</p>
+                    <label>Otelden Çıkış Tarihi: *</label>
+                    <input type="date" id="m_cikis" required>
                 </fieldset>
 
                 <div style="margin-top:25px;">
-                    <button type="submit" class="btn-success">Rezervasyon Talebini Gönder 🐾</button>
+                    <button type="submit" class="btn-success">Detaylı Rezervasyon Talebini Gönder 🐾</button>
                 </div>
             </form>
         </div>
@@ -94,46 +129,60 @@
     <script>
         async function rezervasyonGonder() {
             if(fUrl.includes("BURAYA")) {
-                alert("Sistem altyapısı henüz tamamlanmadı. Lütfen daha sonra tekrar deneyiniz.");
+                alert("Sistem altyapısı henüz tanımlanmadı!");
                 return;
             }
 
-            // HTML Input Date formatını (YYYY-MM-DD) sözleşmeye uygun (GG/AA/YYYY) formatına dönüştürüyoruz
             function formatTarih(tarihStr) {
                 if(!tarihStr) return "";
                 const parcalar = tarihStr.split("-");
                 return `${parcalar[2]}/${parcalar[1]}/${parcalar[0]}`;
             }
 
+            // Tüm alanları bilgisayardaki otomasyonun anahtarlarıyla BİREBİR EŞLEŞTİREREK paketliyoruz
             let talepVeri = {
-                musteri_ad_soyad: document.getElementById("m_ad").value,
-                telefon: document.getElementById("m_tel").value,
-                pet_ad: document.getElementById("m_pet_ad").value,
-                pet_cinsi: document.getElementById("m_pet_cinsi").value,
-                pet_cinsiyeti: document.getElementById("m_pet_cinsiyet").value,
-                giris_tarihi: formatTarih(document.getElementById("m_tarih_giris").value),
-                cikis_tarihi: formatTarih(document.getElementById("m_tarih_cikis").value),
-                mama_notu: document.getElementById("m_mama").value || "Belirtilmedi",
-                saglik_notu: document.getElementById("m_saglik").value || "Yok",
-                talep_tarihi: new Date().toLocaleString('tr-TR'),
-                durum: "Onay Bekliyor"
+                // Sahip Grubu
+                ad_soyad: document.getElementById("s_ad_soyad").value,
+                tc_no: document.getElementById("s_tc_no").value || "",
+                telefon: document.getElementById("s_telefon").value,
+                adres: document.getElementById("s_adres").value || "",
+                acil_ad: document.getElementById("s_acil_ad").value || "",
+                acil_tel: document.getElementById("s_acil_tel").value || "",
+                
+                // Pet Grubu
+                ad: document.getElementById("p_ad").value,
+                turu: document.getElementById("p_turu").value,
+                cinsi: document.getElementById("p_cinsi").value,
+                cinsiyeti: document.getElementById("p_cinsiyeti").value,
+                alerji: document.getElementById("p_alerji").value || "Yok",
+                ilac_durum: document.getElementById("p_ilac_durum").value,
+                ilaclar: document.getElementById("p_ilaclar").value || "",
+                dozlar: document.getElementById("p_dozlar").value || "",
+                mama_marka: document.getElementById("p_mama_marka").value || "",
+                mama_olcu: document.getElementById("p_mama_olcu").value || "",
+                mama_ogun: document.getElementById("p_mama_ogun").value || "",
+                diger_malzeme: document.getElementById("p_diger_malzeme").value || "",
+                
+                // Rezervasyon Rezervasyon Grubu
+                giris_tarihi: formatTarih(document.getElementById("m_giris").value),
+                cikis_tarihi: formatTarih(document.getElementById("m_cikis").value),
+                talep_tarihi: new Date().toLocaleString('tr-TR')
             };
 
             try {
-                // Firebase'de "talepler" adında tamamen izole ve güvenli yeni bir klasöre kaydediyoruz
                 let res = await fetch(`${fUrl}talepler.json?auth=${FIREBASE_SECRET}`, {
                     method: 'POST',
                     body: JSON.stringify(talepVeri)
                 });
                 
                 if(res.ok) {
-                    alert(`Sayın ${talepVeri.musteri_ad_soyad}, ${talepVeri.pet_ad} isimli dostumuz için rezervasyon talebiniz başarıyla alındı! En kısa sürede sizinle iletişime geçeceğiz. 🐾`);
-                    document.getElementById("musteriRezervasyonForm").reset();
+                    alert(`Sayın ${talepVeri.ad_soyad}, ${talepVeri.ad} isimli dostumuzun tüm bilgileri ve rezervasyon talebi başarıyla otel otomasyonuna iletildi! 🐾`);
+                    document.getElementById("tamRezervasyonForm").reset();
                 } else {
-                    alert("Talebiniz iletilirken bir bulut hatası oluştu. Lütfen tekrar deneyiniz.");
+                    alert("Bulut bağlantı hatası oluştu.");
                 }
             } catch(e) {
-                alert("Bağlantı hatası: " + e.message);
+                alert("Hata: " + e.message);
             }
         }
     </script>
