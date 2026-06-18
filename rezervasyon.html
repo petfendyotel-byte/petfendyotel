@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petfendy Evcil Hayvan Oteli - Rezervasyon Formu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
+    <style>
+        body { background-color: #f5f7fa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        header { background: #1e3d59 !important; color: white !important; padding: 20px !important; border-bottom: 3px solid #ffc13b; text-align: center; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.06); padding: 20px; margin-top: 80px; border-top: 5px solid #ffc13b; }
+        .btn-success { background: #4caf50 !important; color: white !important; font-weight: bold; border: none; width: 100%; padding: 12px; font-size: 1.1rem; border-radius: 6px; cursor: pointer; }
+        label { font-weight: bold; color: #1e3d59; margin-top: 10px; display: block; }
+        input, select, textarea { width: 100%; margin-bottom: 12px; border-radius: 4px; border: 1px solid #ccc; padding: 8px; }
+        .info-text { font-size: 0.9rem; color: #666; font-style: italic; margin-top: -8px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <header class="sticky">
+        <span style="font-size:1.4rem; font-weight:bold;">🐾 Petfendy Evcil Hayvan Oteli</span>
+        <div style="font-size:0.9rem; color:#ffc13b; font-weight:bold; margin-top:2px;">Online Rezervasyon İstek Formu</div>
+    </header>
+
+    <div class="container" style="max-width: 550px; padding: 10px;">
+        <div class="card">
+            <p style="text-align: center; color: #555; font-weight: 500;">Misafir etmek istediğiniz patili dostumuzun ve sizin bilgilerinizi eksiksiz doldurarak rezervasyon talebi oluşturabilirsiniz.</p>
+            <hr>
+            
+            <form id="musteriRezervasyonForm" onsubmit="event.preventDefault(); rezervasyonGonder();">
+                <script>
+                    
+ const FIREBASE_URL = "https://petfendy-otel-default-rtdb.europe-west1.firebasedatabase.app";
+            const FIREBASE_SECRET = "AIzaSyDUBfRLVmlIJs0ytVwrtWqiATPsJ_p9XvY";
+
+                    let fUrl = FIREBASE_URL;
+                    if (fUrl && !fUrl.endsWith("/")) fUrl += "/";
+                </script>
+
+                <fieldset>
+                    <legend style="color:#1e3d59; font-weight:bold;">1. İletişim Bilgileriniz</legend>
+                    
+                    <label>Adınız Soyadınız: *</label>
+                    <input type="text" id="m_ad" placeholder="Lütfen tam adınızı yazın" required>
+                    
+                    <label>Telefon Numaranız: *</label>
+                    <input type="tel" id="m_tel" placeholder="05xx xxx xx xx" required>
+                </fieldset>
+
+                <fieldset style="margin-top:15px;">
+                    <legend style="color:#1e3d59; font-weight:bold;">2. Patili Dostumuzun Bilgileri</legend>
+                    
+                    <label>Dostumuzun Adı: *</label>
+                    <input type="text" id="m_pet_ad" placeholder="Dostumuzun adı nedir?" required>
+                    
+                    <label>Türü / Irkı (Cinsi): *</label>
+                    <input type="text" id="m_pet_cinsi" placeholder="Örn: Chihuahua, Pomeranian, Kedi" required>
+                    
+                    <label>Cinsiyeti:</label>
+                    <select id="m_pet_cinsiyet">
+                        <option value="Dişi">Dişi</option>
+                        <option value="Erkek">Erkek</option>
+                    </select>
+                </fieldset>
+
+                <fieldset style="margin-top:15px;">
+                    <legend style="color:#1e3d59; font-weight:bold;">3. Rezervasyon Tarihleri</legend>
+                    
+                    <label>Otele Giriş Tarihi: *</label>
+                    <input type="date" id="m_tarih_giris" required>
+                    
+                    <label>Oteldan Çıkış Tarihi: *</label>
+                    <input type="date" id="m_tarih_cikis" required>
+                </fieldset>
+
+                <fieldset style="margin-top:15px;">
+                    <legend style="color:#1e3d59; font-weight:bold;">4. Beslenme, Sağlık ve Özel Notlar</legend>
+                    
+                    <label>Mama Markası ve Günlük Ölçüsü:</label>
+                    <input type="text" id="m_mama" placeholder="Örn: Royal Canin, günde 2 öğün 40gr">
+                    
+                    <label>Düzenli Kullandığı İlaç veya Alerji Notu:</label>
+                    <textarea id="m_saglik" rows="2" placeholder="Varsa ilaç adı, dozajı veya alerji durumlarını belirtiniz. Yoksa boş bırakabilirsiniz."></textarea>
+                    <p class="info-text">Kronik rahatsızlık veya ilaç kullanımı varsa lütfen detaylıca belirtiniz.</p>
+                </fieldset>
+
+                <div style="margin-top:25px;">
+                    <button type="submit" class="btn-success">Rezervasyon Talebini Gönder 🐾</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        async function rezervasyonGonder() {
+            if(fUrl.includes("BURAYA")) {
+                alert("Sistem altyapısı henüz tamamlanmadı. Lütfen daha sonra tekrar deneyiniz.");
+                return;
+            }
+
+            // HTML Input Date formatını (YYYY-MM-DD) sözleşmeye uygun (GG/AA/YYYY) formatına dönüştürüyoruz
+            function formatTarih(tarihStr) {
+                if(!tarihStr) return "";
+                const parcalar = tarihStr.split("-");
+                return `${parcalar[2]}/${parcalar[1]}/${parcalar[0]}`;
+            }
+
+            let talepVeri = {
+                musteri_ad_soyad: document.getElementById("m_ad").value,
+                telefon: document.getElementById("m_tel").value,
+                pet_ad: document.getElementById("m_pet_ad").value,
+                pet_cinsi: document.getElementById("m_pet_cinsi").value,
+                pet_cinsiyeti: document.getElementById("m_pet_cinsiyet").value,
+                giris_tarihi: formatTarih(document.getElementById("m_tarih_giris").value),
+                cikis_tarihi: formatTarih(document.getElementById("m_tarih_cikis").value),
+                mama_notu: document.getElementById("m_mama").value || "Belirtilmedi",
+                saglik_notu: document.getElementById("m_saglik").value || "Yok",
+                talep_tarihi: new Date().toLocaleString('tr-TR'),
+                durum: "Onay Bekliyor"
+            };
+
+            try {
+                // Firebase'de "talepler" adında tamamen izole ve güvenli yeni bir klasöre kaydediyoruz
+                let res = await fetch(`${fUrl}talepler.json?auth=${FIREBASE_SECRET}`, {
+                    method: 'POST',
+                    body: JSON.stringify(talepVeri)
+                });
+                
+                if(res.ok) {
+                    alert(`Sayın ${talepVeri.musteri_ad_soyad}, ${talepVeri.pet_ad} isimli dostumuz için rezervasyon talebiniz başarıyla alındı! En kısa sürede sizinle iletişime geçeceğiz. 🐾`);
+                    document.getElementById("musteriRezervasyonForm").reset();
+                } else {
+                    alert("Talebiniz iletilirken bir bulut hatası oluştu. Lütfen tekrar deneyiniz.");
+                }
+            } catch(e) {
+                alert("Bağlantı hatası: " + e.message);
+            }
+        }
+    </script>
+</body>
+</html>
